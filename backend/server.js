@@ -45,7 +45,11 @@ app.get('/api/schemes/:id', async (req, res) => {
       'SELECT source_url, source_type, last_checked_at FROM sources WHERE scheme_id = $1',
       [req.params.id]
     );
-    res.json({ ...scheme.rows[0], sources: sources.rows });
+        const docs = await pool.query(
+      'SELECT document_name, notes FROM required_documents WHERE scheme_id = $1 ORDER BY document_id',
+      [req.params.id]
+    );
+    res.json({ ...scheme.rows[0], sources: sources.rows, documents: docs.rows });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -58,14 +62,16 @@ async function handleMatch(req, res) {
       'SELECT scheme_id, name, category, benefits, application_url FROM schemes WHERE is_active = TRUE ORDER BY scheme_id'
     );
     const rules = await pool.query('SELECT * FROM eligibility_rules');
+        const docs = await pool.query('SELECT scheme_id, document_name FROM required_documents ORDER BY document_id');
     const results = schemes.rows.map((s) => {
-      const r = evaluate(rules.rows.filter((x) => x.scheme_id === s.scheme_id), profile);
+        const r = evaluate(rules.rows.filter((x) => x.scheme_id === s.scheme_id), profile);
       return {
         scheme_id: s.scheme_id,
         name: s.name,
         category: s.category,
         benefits: s.benefits,
         official_link: s.application_url,
+        documents: docs.rows.filter((d) => d.scheme_id === s.scheme_id).map((d) => d.document_name),
         status: r.status,
         criteria_not_met: r.failed.map((f) => `${f.rule_type}: ${f.field_name} ${f.operator} ${f.expected_value}`),
         information_needed: r.missing,

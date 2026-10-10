@@ -29,6 +29,7 @@ const MORE_FIELDS = [
   { name: 'has_weaver_certificate', label: 'Have Weaver Certificate / Pehchan Card?', options: YESNO },
   { name: 'has_powerloom_registration', label: 'Have Powerloom Registration Certificate?', options: YESNO },
   { name: 'has_discom_dues', label: 'Pending electricity (DISCOM) dues?', options: YESNO },
+  { name: 'is_coop_member', label: 'Member of a Primary Handloom Weavers Co-operative Society?', options: YESNO },
 ];
 
 const ALL_FIELDS = [...BASIC_FIELDS, ...MORE_FIELDS];
@@ -132,7 +133,7 @@ export default function App() {
 
   return (
     <div className="container">
-            <header className="hero">
+      <header className="hero">
         <div className="hero-badge">Andhra Pradesh</div>
         <h1>Smart Government Scheme Assistant</h1>
         <p>Find schemes you may be eligible for, with links to official sources.</p>
@@ -165,6 +166,18 @@ export default function App() {
               <p><b>Known criteria:</b> {selected.known_criteria}</p>
               <p><b>Benefits:</b> {selected.benefits}</p>
               <p className="small">Verified on {selected.verified_on ? String(selected.verified_on).slice(0, 10) : 'N/A'} | {selected.verification_status}</p>
+
+              <b>Documents needed:</b>
+              {selected.documents && selected.documents.length > 0 ? (
+                <ul>
+                  {selected.documents.map((d, i) => (
+                    <li key={i}>{d.document_name}{d.notes ? ` (${d.notes})` : ''}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="small">Document list not available yet. Please check the official source or your Village/Ward Secretariat.</p>
+              )}
+
               <b>Official sources:</b>
               <ul>
                 {selected.sources.map((s, i) => (
@@ -223,6 +236,9 @@ export default function App() {
                         )}
                         {r.criteria_not_met.length > 0 && (
                           <p className="small"><b>Not matched:</b> {r.criteria_not_met.join('; ')}</p>
+                        )}
+                        {(status === 'potential_match' || status === 'more_information_needed') && (
+                          <p className="small"><b>Documents:</b> {r.documents && r.documents.length > 0 ? r.documents.join('; ') : 'List not available yet, check the official source.'}</p>
                         )}
                         {status === 'rules_not_added' && (
                           <p className="small">Eligibility rules for this scheme are not added yet. Please check the official source.</p>
