@@ -3,9 +3,11 @@ const cors = require('cors');
 const pool = require('./db');
 const { evaluate } = require('./matcher');
 const { cleanProfile } = require('./validate');
+const path = require('path');
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, '..', 'frontend', 'dist')));
 
 // Check: server and database working?
 app.get('/api/health', async (req, res) => {
@@ -89,4 +91,5 @@ async function handleMatch(req, res) {
 }
 app.get('/api/match', handleMatch);   // easy browser testing
 app.post('/api/match', handleMatch);  // used by the React form later
-app.listen(5000, () => console.log('Server running on http://localhost:5000'));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
