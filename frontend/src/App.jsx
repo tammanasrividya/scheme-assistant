@@ -94,7 +94,7 @@ export default function App() {
     }
   }
 
-  async function checkEligibility(e) {
+    async function checkEligibility(e) {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -105,6 +105,12 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
+      if (res.status === 400) {
+        const bad = await res.json();
+        setError('Please correct: ' + bad.errors.join('. '));
+        setLoading(false);
+        return;
+      }
       if (!res.ok) throw new Error();
       const data = await res.json();
       setResults(data.results);

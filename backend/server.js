@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const pool = require('./db');
 const { evaluate } = require('./matcher');
+const { cleanProfile } = require('./validate');
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -57,7 +58,8 @@ app.get('/api/schemes/:id', async (req, res) => {
 // Match: user profile -> list of schemes with status
 async function handleMatch(req, res) {
   try {
-    const profile = { ...req.query, ...(req.body || {}) };
+        const { profile, errors } = cleanProfile({ ...req.query, ...(req.body || {}) });
+    if (errors.length > 0) return res.status(400).json({ errors });
     const schemes = await pool.query(
       'SELECT scheme_id, name, category, benefits, application_url FROM schemes WHERE is_active = TRUE ORDER BY scheme_id'
     );
