@@ -1,5 +1,7 @@
 # Smart Government Scheme Assistant
+**Live demo:** https://scheme-assistant-20ul.onrender.com
 
+*Note: First load may take about a minute (free hosting).*
 Web app that helps people find Andhra Pradesh government schemes they may be eligible for. Results are preliminary; the government authority makes the final decision.
 
 ## Stack
